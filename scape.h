@@ -22,7 +22,7 @@ signals:
 
 public slots:
 private:
-    int next;
+
 };
 
 #endif // SCAPE_H

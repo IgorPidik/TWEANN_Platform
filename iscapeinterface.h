@@ -27,9 +27,15 @@ public:
      */
     virtual double getScore(QList<double> &input, QList<double> &output) = 0;
 
+
+    /**
+     * @brief getNewInstance
+     * @param parent
+     *
+     * Returns new instance of object
+     */
     virtual IScapeInterface *getNewInstance(QObject* parent) = 0;
-private:
-    int next;
+
 };
 
 Q_DECLARE_INTERFACE(IScapeInterface, "com.NeuralNetwork.IScapeInterface")
