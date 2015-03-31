@@ -55,7 +55,7 @@ private:
     void train();
 
     int mNetworksDone;
-    int mMutationAttempts;
+    int mAttempts;
 
     int mPopulation;
 

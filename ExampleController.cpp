@@ -4,11 +4,13 @@
 #include "ExampleScape.h"
 #include <iostream>
 
+#define MaxAttempts 1000
+
 Controller::Controller(QObject *parent) : QObject(parent)
 {
     qDebug() << "starting conntroller";
     mPopulation = 20;
-    mMutationAttempts = 0;
+    mAttempts = 0;
     mNetworksDone = mPopulation;
     NeuralNetwork *net = new NeuralNetwork(this);
 
@@ -56,18 +58,18 @@ void Controller::trainingDone()
     {
         qDebug() << "all done";
         qSort(nets.begin(), nets.end(), compareNeuralNetwork);
-        if(nets.first()->score() > 0.95 )
+        if(nets.first()->score() > 0.95 || mAttempts == MaxAttempts)
         {
-            qDebug() << "score > 0.9" << "score" << nets.first()->score();
+            qDebug() << "training done";
+            // TODO: need save and load method
 
         }
         else
         {
             mNetworksDone = mPopulation;
+            // if neuralnetwork's score from previous generation was better than new score we return to that step
             if(nets.first()->score() < bestNetwork->score() || nets.first()->score() == bestNetwork->score())
             {
-                qDebug() << "######################################reset population";
-
                 resetPopulation(bestNetwork);
             }
             else
@@ -113,7 +115,7 @@ void Controller::resetPopulation(NeuralNetwork *net)
 
 void Controller::train()
 {
-    mMutationAttempts++;
+    mAttempts++;
     get3champions();
     fillPopulation();
     foreach (NeuralNetwork *net, nets)
