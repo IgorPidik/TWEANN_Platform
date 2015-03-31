@@ -14,3 +14,4 @@ and mutates them. This process continues until max possible attempts are used or
 * **NeuralNetwork.h,.cpp** - Class NeuralNetwork represent actual neural network with methods for **proccessing input**, coping, mutating.
 * **Neuron.h,.cpp** - Basic unit of neural networks handles input from other neurons, proccessing and sending value to other neurons.
 * **Connections.h,.cpp** - Handles adding, storing, deleting, updating... of weights between neurons.
+* **IScapeInterface.h** - Interface for scape class, which provides inputs for training and scores outputs from neural networks.
