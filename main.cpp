@@ -1,5 +1,5 @@
 #include <QCoreApplication>
-#include "controller.h"
+#include "ExampleController.h"
 
 int main(int argc, char *argv[])
 {

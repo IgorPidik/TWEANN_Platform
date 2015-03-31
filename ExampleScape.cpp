@@ -1,8 +1,7 @@
-#include "scape.h"
+#include "ExampleScape.h"
 
 Scape::Scape(QObject *parent) : QObject(parent)
 {
-    next = 0;
 }
 
 Scape::~Scape()

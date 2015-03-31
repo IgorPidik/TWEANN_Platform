@@ -1,7 +1,7 @@
-#include "controller.h"
+#include "ExampleController.h"
 #include <QTime>
 #include <QtAlgorithms>
-#include "scape.h"
+#include "ExampleScape.h"
 #include <iostream>
 
 Controller::Controller(QObject *parent) : QObject(parent)

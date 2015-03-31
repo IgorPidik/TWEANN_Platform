@@ -19,13 +19,16 @@ SOURCES += main.cpp \
     neuron.cpp \
     connections.cpp \
     neuralnetwork.cpp \
-    controller.cpp \
-    scape.cpp
+    ExampleController.cpp \
+    ExampleScape.cpp
 
 HEADERS += \
     neuron.h \
     connections.h \
     neuralnetwork.h \
-    controller.h \
-    scape.h \
-    iscapeinterface.h
+    iscapeinterface.h \
+    ExampleScape.h \
+    ExampleController.h
+
+DISTFILES += \
+    README.md
