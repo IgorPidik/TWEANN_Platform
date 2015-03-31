@@ -9,8 +9,7 @@ all neural networks but 3 top-scored. Afterwards platform replace deleted neural
 and mutates them. This process continues until max possible attempts are used or requested score(fitness) is reached.
 
 ## Overview
-**ExampleController.h,.cpp** and **ExampleScape.h,cpp** shows full example how can this API be used. And should be deleted in your project.
-
+* **ExampleController.h,.cpp** and **ExampleScape.h,cpp** shows full example how can this API be used. And should be deleted in your project.
 * **NeuralNetwork.h,.cpp** - Class NeuralNetwork represent actual neural network with methods for **proccessing input**, coping, mutating.
 * **Neuron.h,.cpp** - Basic unit of neural networks handles input from other neurons, proccessing and sending value to other neurons.
 * **Connections.h,.cpp** - Handles adding, storing, deleting, updating... of weights between neurons.
