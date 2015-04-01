@@ -45,4 +45,4 @@ connect(net, &NeuralNetwork::trainingDone, this, &Controller::trainingDone, Qt::
 Scape *scape = new Scape(net);
 net->setScape(scape);
 ```
-3. After these steps API is ready to train neural networks.
+**After these steps API is ready to train neural networks.**
