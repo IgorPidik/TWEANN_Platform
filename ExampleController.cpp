@@ -20,10 +20,8 @@ Controller::Controller(QObject *parent) : QObject(parent)
     vec.append(1);
 
     NeuralNetwork *net = new NeuralNetwork(this);
-
-    connect(net, &NeuralNetwork::trainingDone, this, &Controller::trainingDone, Qt::QueuedConnection);
-
     net->construct(vec);
+    connect(net, &NeuralNetwork::trainingDone, this, &Controller::trainingDone, Qt::QueuedConnection);
 
     //set network's training scape
     Scape *scape = new Scape(net);
