@@ -78,7 +78,7 @@ void NeuralNetwork::mutate(NeuralNetwork::Mutation mutation)
             break;
 
         case MUTATE_ACTIVATION_FUNCTION:
-            qDebug() << "mutaion @@@ MUTATE_ACTIVATION_FUCTION";
+            qDebug() << "mutaion #### MUTATE_ACTIVATION_FUCTION";
             mutateActivationFunction();
             break;
 
