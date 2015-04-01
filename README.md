@@ -18,6 +18,7 @@ and mutates them. This process continues until max possible attempts are used or
 ##Usage
 1. Implement training scape using IScapeInterface interface class, see **ExampleScape.h,.cpp**
 2. Implement controller that controls flow of training process
+
 * Construct NeuralNetwork object:
 ```C++
 NeuralNetwork *net = new NeuralNetwork(this);
