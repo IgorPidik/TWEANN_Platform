@@ -12,16 +12,17 @@ Controller::Controller(QObject *parent) : QObject(parent)
     mPopulation = 20;
     mAttempts = 0;
     mNetworksDone = mPopulation;
-    NeuralNetwork *net = new NeuralNetwork(this);
-
-    net->setScore(0);
-    connect(net, &NeuralNetwork::trainingDone, this, &Controller::trainingDone, Qt::QueuedConnection);
 
     //set base topology for neural network
     QVector<int> vec;
     vec.append(2);
     vec.append(1);
     vec.append(1);
+
+    NeuralNetwork *net = new NeuralNetwork(this);
+
+    connect(net, &NeuralNetwork::trainingDone, this, &Controller::trainingDone, Qt::QueuedConnection);
+
     net->construct(vec);
 
     //set network's training scape
@@ -123,10 +124,7 @@ void Controller::train()
         mutateNN(net, (round(net->neurons().length()/3)));
         net->scoreNN(10);
     }
-
-
 }
-
 
 void Controller::mutateNN(NeuralNetwork *net, int index)
 {
