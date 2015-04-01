@@ -30,5 +30,4 @@ HEADERS += \
     ExampleScape.h \
     ExampleController.h
 
-DISTFILES += \
-    README.md
+DISTFILES +=
