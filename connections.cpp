@@ -13,7 +13,8 @@ Connections::~Connections()
 
 void Connections::addConnection(Neuron *from, Neuron *to)
 {
-    qDebug() << "connection" << from->layer() << "id" << from->id() << "to" << to->layer() << "id" << to->id();
+    qDebug() << "[*] Creating connection: From layer" << from->layer()
+             << ", neuron's id" << from->id() << "to layer" << to->layer() << ", neuron's id" << to->id();
     double weight = randomWeight();
     Connection connection(from, to, weight);
     if(!mConnections.contains(connection))
@@ -39,7 +40,8 @@ void Connections::addConnection(Neuron *from, Neuron *to, double weight)
         mConnections.append(connection);
         if(isConnectionRecurrent(from, to))
         {
-            qDebug() << "recurrent connection" << from->layer() << from->id() << to->layer() << to->id();
+            qDebug() << "[*] Creating recurrent connection: From layer" << from->layer()
+                     << ", neuron's id" << from->id() << "to layer" << to->layer() << ", neuron's id" << to->id();
             mRecurrentConnections.append(connection);
         }
     }
@@ -59,7 +61,7 @@ void Connections::deleteConnection(Neuron *from, Neuron *to)
 {
     to->setNumConnections(to->numConnections()-1);
     if(disconnect(from, &Neuron::proccesed, to, &Neuron::input))
-        qDebug() << "succesfully disconnected";
+        qDebug() << "[*] Neurons succesfully disconnected";
     int recurrentConnectionId = getRecurrentConnectionId(from, to);
     if(recurrentConnectionId != -1)
         mRecurrentConnections.removeAt(recurrentConnectionId);
@@ -76,7 +78,7 @@ void Connections::initRecurrentNeurons()
 
     foreach (Connection connection, mRecurrentConnections)
     {
-        qDebug() << "recurrent";
+        qDebug() << "[*] Initing recurrent connection";
         connection.to->init(0);
     }
 }
@@ -104,7 +106,7 @@ int Connections::getConnectionId(Neuron *from, Neuron *to)
     int id = mConnections.indexOf(connection);
     if(id == -1)
     {
-        qDebug() << "Connections:getConnectionId: Error connection does not exist!";
+        qDebug() << "[*] Connections:getConnectionId: Error, connection does not exist!";
         throw "error";
     }
     return id;

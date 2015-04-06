@@ -114,8 +114,6 @@ public:
      */
     QList<Connection> connections();
 
-    int numRecurrentConnection() { return mRecurrentConnections.length();}
-
 
 private:
 

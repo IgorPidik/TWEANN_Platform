@@ -18,11 +18,6 @@ public:
     double getScore(QList<double> &input, QList<double> &output);
     Scape *getNewInstance(QObject *parent);
 
-signals:
-
-public slots:
-private:
-
 };
 
 #endif // SCAPE_H

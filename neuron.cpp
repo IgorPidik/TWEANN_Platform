@@ -10,12 +10,12 @@ Neuron::Neuron(int id, double layer, QObject *parent) : QObject(parent)
     mOutput = 0;
     mActivationFunction = TANH;
     mNetwork = qobject_cast<NeuralNetwork*>(parent);
-    qDebug() << "new neuron" << "layer" << layer << "id" << id;
+    qDebug() << "[*] New neuron" << "layer" << layer << "id" << id;
 }
 
 Neuron::~Neuron()
 {
-    qDebug() << "Neuron destructor";
+    qDebug() << "[*] Neuron destructor";
 }
 
 double Neuron::layer()
@@ -38,9 +38,8 @@ void Neuron::init(double input)
 {
     mNumInputs--;
     mOutput += input;
- //   qDebug() << "init neuron in layer" << layer() << "id" << mId;
 
-    qDebug() << "neuron" << mId << "waiting for " << mNumInputs << "signals from base " << mBaseNumInputs;
+    qDebug() << "[*] Neuron" << mId << "waiting for " << mNumInputs << "signals from base " << mBaseNumInputs;
     if(mNumInputs == 0)
     {
         mNumInputs = mBaseNumInputs;
@@ -71,9 +70,9 @@ void Neuron::input(double input)
      if(mNumInputs != 0)
         mNumInputs--;
 
-    qDebug() << "neuron "<< mId << "waiting for" << mNumInputs << "signals from base " << mBaseNumInputs << " layer " << layer() << "sender layer";
+    qDebug() << "[*] Neuron "<< mId << "waiting for" << mNumInputs << "signals from base " << mBaseNumInputs << " layer " << layer() << "sender layer";
     float weight = mNetwork->connectionManager()->getConnectionWeight(qobject_cast<Neuron*>(sender()), this);
-    qDebug() << "weight" << weight;
+    qDebug() << "[*] Weight:" << weight;
 
      mOutput += input*weight;
      if(mNumInputs == 0)
@@ -105,8 +104,8 @@ double Neuron::activationFunction(double x)
     //        return guess(x);
 
         default:
-            qDebug() << "##### Error in actiovation functions";
-            throw "error|";
+            qDebug() << "[*] Error in actiovation functions";
+            throw "error";
             break;
     }
 }

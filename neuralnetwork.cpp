@@ -9,7 +9,7 @@ NeuralNetwork::NeuralNetwork(QObject *parent) : QObject(parent)
     mScore = 0;
     mTraining = false;
     mAttempts = 0;
-
+    mInit = true;
     connect(this, &NeuralNetwork::newNeuralNetworkOutput, this, &NeuralNetwork::neuralNetworkOutput, Qt::QueuedConnection);
 }
 
@@ -26,19 +26,9 @@ void NeuralNetwork::construct(QVector<int> &topology)
         Layer layer;
         for (int j = 0; j < topology.at(i); j++)
         {
-            if(!(topology.length() == i+1))
-            {
-                Neuron *neuron = new Neuron(getIdForNeuron(), (double)i, this);
-                layer.append(neuron);
-                mNeurons.append(neuron);
-            }
-            else
-            {
-                //Last layer neurons , no connections from this neurons only back to neural network
-                Neuron *neuron = new Neuron(getIdForNeuron(), (double)i, this);
-                layer.append(neuron);
-                mNeurons.append(neuron);
-            }
+            Neuron *neuron = new Neuron(getIdForNeuron(), (double)i, this);
+            layer.append(neuron);
+            mNeurons.append(neuron);
         }
         mLayers.append(layer);
     }
@@ -47,6 +37,55 @@ void NeuralNetwork::construct(QVector<int> &topology)
         neuron->setNumConnections(1);
     }
     connectNeuralNewtork();
+
+}
+
+void NeuralNetwork::construct(QString filePath)
+{
+    QFile file(filePath);
+    if(!file.open(QIODevice::ReadOnly | QIODevice::Text))
+    {
+        qDebug() << "Cannot open file: "<< filePath;
+        return;
+    }
+    QTextStream in(&file);
+    QString stringTopology = in.readLine();
+    QStringList list = stringTopology.split(" ");
+    list.removeLast();
+    QVector<int> topology;
+    foreach(QString neurons, list)
+    {
+        topology.append(neurons.toInt());
+    }
+    for(int i = 0; i < topology.length(); i++)
+    {
+        Layer layer;
+        for (int j = 0; j < topology.at(i); j++)
+        {
+            int id = in.readLine().toInt();
+            Neuron *neuron = new Neuron(id, (double)i, this);
+            layer.append(neuron);
+            mNeurons.append(neuron);
+        }
+        mLayers.append(layer);
+    }
+    foreach (Neuron *neuron, mLayers.first())
+    {
+        neuron->setNumConnections(1);
+    }
+    while (!in.atEnd())
+    {
+        QStringList connection = in.readLine().split(" ");
+        int idFrom = connection.at(0).toInt();
+        int idTo = connection.at(1).toInt();
+        double weight = connection.at(2).toDouble();
+        qDebug() << "connect" << idFrom << idTo << weight;
+        addConnection(idFrom, idTo, weight);
+    }
+    foreach(Neuron *neuron, mLayers.last())
+    {
+        connect(neuron, &Neuron::proccesed, this, &NeuralNetwork::newNeuronOutput);
+    }
 
 }
 
@@ -65,26 +104,26 @@ void NeuralNetwork::mutate(NeuralNetwork::Mutation mutation)
     switch (mutation)
     {
         case ADD_CONNECTION:
-            qDebug() << "mutation #### ADD_CONNECTION";
+            qDebug() << "[*] Mutation #### ADD_CONNECTION";
             addConnection();
             break;
         case ADD_NEURON:
-            qDebug() << "mutation #### ADD_NEURON";
+            qDebug() << "[*] Mutation #### ADD_NEURON";
             addNeuron();
             break;
         case MUTATE_WEIGHT:
-            qDebug() << "mutation #### MUTATE_WEIGHT";
+            qDebug() << "[*] Mutation #### MUTATE_WEIGHT";
             mutateWeight();
             break;
 
         case MUTATE_ACTIVATION_FUNCTION:
-            qDebug() << "mutaion #### MUTATE_ACTIVATION_FUCTION";
+            qDebug() << "[*] Mutaion #### MUTATE_ACTIVATION_FUCTION";
             mutateActivationFunction();
             break;
 
         default:
+            qDebug() << "[*] Error: mutate(): error switch in default";
             throw "error";
-            qDebug() << "mutate(): error switch in default";
             break;
     }
     resetANN();
@@ -95,7 +134,7 @@ void NeuralNetwork::feed(QList<double> &input)
     mInit = false;
     mOutput.clear();
 
-    qDebug() << "################################### feed";
+    qDebug() << "[*] Feeding";
     if(input.length() == mLayers.first().length())
     {
         for(int i = 0; i < mLayers.first().length(); i++)
@@ -106,7 +145,7 @@ void NeuralNetwork::feed(QList<double> &input)
     }
     else
     {
-        qDebug() << "Wrong length of input";
+        qDebug() << "[*] Wrong length of input";
         throw "error";
     }
 }
@@ -118,10 +157,10 @@ QList<Neuron *> NeuralNetwork::neurons()
 
 NeuralNetwork *NeuralNetwork::copy()
 {
-    qDebug() << "################ Copying neural network";
+    qDebug() << "[*] Copying neural network";
 
     NeuralNetwork *net = new NeuralNetwork(parent());
-    net->setLastId(getIdForNeuron()-1);
+
     for(int i = 0; i < mLayers.length(); i++)
     {
         Layer layer = mLayers.at(i);
@@ -151,7 +190,7 @@ NeuralNetwork *NeuralNetwork::copy()
     QList<Connection> connection = mConnectionsManager->connections();
     net->copyConnections(connection);
 
-    qDebug() << "################ Copying done";
+    qDebug() << "[*] Copying done";
 
     return net;
 }
@@ -172,22 +211,7 @@ void NeuralNetwork::copyConnections(QList<Connection> &connections)
     {
         int fromNeuronId = connection.from->id();
         int toNeuronId = connection.to->id();
-        Neuron *from = 0;
-        Neuron *to = 0;
-        foreach (Neuron *neuron, mNeurons)
-        {
-            if(neuron->id() == fromNeuronId)
-                from = neuron;
-            else if(neuron->id() == toNeuronId)
-                to = neuron;
-        }
-        if(from == 0 || to == 0)
-        {
-            qDebug() << "error copy" << fromNeuronId << toNeuronId;
-            throw "error copy";
-        }
-
-        mConnectionsManager->addConnection(from, to, connection.weight);
+        addConnection(fromNeuronId, toNeuronId, connection.weight);
     }
 }
 
@@ -224,7 +248,7 @@ IScapeInterface *NeuralNetwork::scape()
 void NeuralNetwork::scoreNN(int attempts)
 {
     resetANN();
-    qDebug() << "init done";
+    qDebug() << "[*] Init done";
     mInit = false;
     mTraining = true;
     mScore = 0;
@@ -241,6 +265,39 @@ QList<double> NeuralNetwork::output()
     return mOutput;
 }
 
+void NeuralNetwork::saveNN(QString filePath)
+{
+    QFile file(filePath);
+    if(!file.open(QIODevice::WriteOnly | QIODevice::Text))
+    {
+        qDebug() << "[*] Error, cannot open file: "<< filePath;
+        return;
+    }
+    QVector<int> topology;
+    foreach (Layer layer, mLayers)
+    {
+        topology.append(layer.length());
+    }
+
+    QTextStream out(&file);
+    foreach(int neurons, topology)
+    {
+        out << neurons << " ";
+    }
+    out << "\n";
+    foreach(Neuron *neuron, mNeurons)
+    {
+        out << neuron->id() << "\n";
+    }
+    foreach (Connection connection, mConnectionsManager->connections())
+    {
+        out << connection.from->id() << " " << connection.to->id() << " " << connection.weight << "\n";
+    }
+    out.flush();
+    file.close();
+
+}
+
 void NeuralNetwork::newNeuronOutput(double output)
 {
 
@@ -254,21 +311,10 @@ void NeuralNetwork::newNeuronOutput(double output)
 
 void NeuralNetwork::neuralNetworkOutput(QList<double> outputs)
 {
-
-    if(!mInit)
-    {
-        foreach (double output, outputs)
-        {
-            qDebug() << "output" << output;
-
-            qDebug() << "########################################################";
-
-        }
-    }
-
     if(mTraining && !mInit)
     {
-        qDebug() << "input" << mTrainingInputs << " score" << mScape->getScore(mTrainingInputs, outputs);
+        qDebug() << "[*] Input: " << mTrainingInputs << "Output: "<< outputs << "Score: " << mScape->getScore(mTrainingInputs, outputs);
+        qDebug() << "########################################################";
         mScore += mScape->getScore(mTrainingInputs, outputs);
 
         testNN();
@@ -305,7 +351,7 @@ void NeuralNetwork::testNN()
         mTrainingInputs = mScape->getInput();
         foreach (double input, mTrainingInputs)
         {
-            qDebug() << "input" << input;
+            qDebug() << "[*] Input" << input;
         }
         this->feed(mTrainingInputs);
     }
@@ -325,7 +371,7 @@ void NeuralNetwork::resetANN()
     {
         neuron->reset();
     }
-    qDebug() << "initing";
+    qDebug() << "[*] Initing";
     initANN();
 }
 
@@ -357,12 +403,32 @@ void NeuralNetwork::addConnection()
             to = mNeurons.at(qrand() % mNeurons.size());
 
         addConnection(from, to);
-        qDebug() << "add connection from layer" << from->layer() << "to layer" << to->layer();
+        qDebug() << "[*] Adding connection from layer" << from->layer() << "to layer" << to->layer();
 
 
     }
 
 
+}
+
+void NeuralNetwork::addConnection(int fromId, int toId, double weight)
+{
+    Neuron *from = 0;
+    Neuron *to = 0;
+    foreach (Neuron *neuron, mNeurons)
+    {
+        if(neuron->id() == fromId)
+            from = neuron;
+        else if(neuron->id() == toId)
+            to = neuron;
+    }
+    if(from == 0 || to == 0)
+    {
+        qDebug() << "[*] Error adding connection no neurons with these ids:" << fromId << toId;
+        throw "error copy";
+    }
+
+    mConnectionsManager->addConnection(from, to, weight);
 }
 
 void NeuralNetwork::addConnection(Neuron *from, Neuron *to)
@@ -390,7 +456,6 @@ void NeuralNetwork::addConnectionFrom(Neuron *from)
 
         addConnection(from, to);
         qDebug() << "add connection from layer" << from->layer() << "to layer" << to->layer();
-
 
     }
 
@@ -444,13 +509,11 @@ void NeuralNetwork::mutateWeight()
     //choose random connection change weight
     int length = mConnectionsManager->connections().length();
 
-
     int random = (qrand() % length);
 
-    qDebug() << "random connection id" <<random << "rec connection" << mConnectionsManager->numRecurrentConnection();
     Connection connection = mConnectionsManager->connections().at(random);
     mConnectionsManager->setWeight(connection.from, connection.to, mConnectionsManager->randomWeight());
-    qDebug() << "rec connection" << mConnectionsManager->numRecurrentConnection();
+
 }
 
 void NeuralNetwork::connectNeuralNewtork()
@@ -482,6 +545,12 @@ void NeuralNetwork::connectNeuralNewtork()
 
 int NeuralNetwork::getIdForNeuron()
 {
-    mIdForNeuron +=1;
-    return mIdForNeuron;
+    int maxId = 0;
+    foreach (Neuron *neuron, mNeurons)
+    {
+        if(neuron->id() > maxId)
+            maxId = neuron->id();
+    }
+
+    return (maxId+1);
 }

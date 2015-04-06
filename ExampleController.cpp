@@ -8,7 +8,7 @@
 
 Controller::Controller(QObject *parent) : QObject(parent)
 {
-    qDebug() << "starting conntroller";
+    qDebug() << "[*] Starting conntroller";
     mPopulation = 20;
     mAttempts = 0;
     mNetworksDone = mPopulation;
@@ -20,8 +20,10 @@ Controller::Controller(QObject *parent) : QObject(parent)
     vec.append(1);
 
     NeuralNetwork *net = new NeuralNetwork(this);
+
     net->construct(vec);
     connect(net, &NeuralNetwork::trainingDone, this, &Controller::trainingDone, Qt::QueuedConnection);
+
 
     //set network's training scape
     Scape *scape = new Scape(net);
@@ -37,11 +39,12 @@ Controller::Controller(QObject *parent) : QObject(parent)
 
     //start with training
     train();
+
 }
 
 Controller::~Controller()
 {
-    qDebug() << "stopping conroller";
+    qDebug() << "[*] Stopping conroller";
 }
 
 bool Controller::compareNeuralNetwork(NeuralNetwork *net1, NeuralNetwork *net2)
@@ -51,16 +54,18 @@ bool Controller::compareNeuralNetwork(NeuralNetwork *net1, NeuralNetwork *net2)
 
 void Controller::trainingDone()
 {
-    qDebug() << "done" << --mNetworksDone;
+    qDebug() << "[*] Networks training left" << --mNetworksDone;
 
     if(mNetworksDone == 0)
     {
-        qDebug() << "all done";
+        qDebug() << "[*] All networks done training";
         qSort(nets.begin(), nets.end(), compareNeuralNetwork);
         if(nets.first()->score() > 0.95 || mAttempts == MaxAttempts)
         {
-            qDebug() << "training done";
-            // TODO: need save and load method
+            qDebug() << "[*] Best neural network's score " << nets.first()->score();
+            QString path = QDir::currentPath();
+            path.append("/test.nn");
+            nets.first()->saveNN(path);
 
         }
         else
@@ -73,7 +78,6 @@ void Controller::trainingDone()
             }
             else
             {
-                qDebug() << "bestNet score" << nets.first()->score() << bestNetwork->score();
                 bestNetwork = nets.first()->copy();
                 bestNetwork->setScore(nets.first()->score());
 
@@ -89,6 +93,7 @@ void Controller::get3champions()
     qSort(nets.begin(), nets.end(), compareNeuralNetwork);
     while(nets.size() != 3)
     {
+        nets.last()->deleteLater();
         nets.removeLast();
     }
 }

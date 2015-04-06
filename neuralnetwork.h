@@ -50,6 +50,14 @@ public:
     void construct(QVector<int> &topology);
 
     /**
+     * @brief construct
+     * @param filePath
+     *
+     * Constructs neural network from file
+     */
+    void construct(QString filePath);
+
+    /**
      * @brief connectionManager
      * @return pointer to Connections class
      *
@@ -168,8 +176,13 @@ public:
      */
     QList<double> output();
 
-    void setLastId(int id) {mIdForNeuron = id;}
-
+    /**
+     * @brief saveNN
+     * @param filePath
+     *
+     * Saves neural network and its connections in a file
+     */
+    void saveNN(QString filePath);
 
 signals:
     /**
@@ -243,6 +256,15 @@ private:
      * Adds connection in neural network
      */
     void addConnection();
+
+    /**
+     * @brief addConnection
+     * @param fromId
+     * @param toId
+     *
+     * Adds connection using ids
+     */
+    void addConnection(int fromId, int toId, double weight);
 
     /**
      * @brief addConnection
